@@ -8,6 +8,7 @@ package no.hvl.dat110.util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -21,8 +22,22 @@ public class Hash {
 		// Task: Hash a given string using MD5 and return the result as a BigInteger.
 		
 		// we use MD5 with 128 bits digest
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			// compute the hash of the input 'entity'
+			byte[] siffere = md.digest(entity.getBytes(StandardCharsets.UTF_8));
+			
+			// convert the hash into hex format
+			StringBuilder hex = new StringBuilder();
+			for (int i = 0; i<siffere.length;i++) {
+				hex.append(String.format("%02x", siffere[i]));
+			}
+			
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		// compute the hash of the input 'entity'
 		
 		// convert the hash into hex format
 		
