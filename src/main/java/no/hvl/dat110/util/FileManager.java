@@ -59,7 +59,10 @@ public class FileManager {
 	public void createReplicaFiles() {
 	 	
 		// set a loop where size = numReplicas
-		
+		Util.numReplicas
+		for(int i = 0; i<4; i++) {
+			
+		}
 		// replicate by adding the index to filename
 		
 		// hash the replica
