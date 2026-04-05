@@ -39,10 +39,8 @@ public class Hash {
 		}
 		
 		
-		// convert the hash into hex format
-		
 		// convert the hex into BigInteger
-		
+		hashint = hex;
 		// return the BigInteger
 		
 		return hashint;
