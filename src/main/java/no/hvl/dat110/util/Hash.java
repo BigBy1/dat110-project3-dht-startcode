@@ -53,12 +53,12 @@ public class Hash {
 		// Task: compute the address size of MD5
 		
 		// compute the number of bits = bitSize()
-		
+		int bits = bitSize();
 		// compute the address size = 2 ^ number of bits
-		
+		BigInteger IntaddressSize = BigInteger.valueOf(2).pow(bits);
 		// return the address size
 		
-		return null;
+		return IntaddressSize;
 	}
 	
 	public static int bitSize() {
