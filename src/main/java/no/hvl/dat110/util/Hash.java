@@ -33,14 +33,16 @@ public class Hash {
 				hex.append(String.format("%02x", siffere[i]));
 			}
 			
+		// convert the hex into BigInteger
+		hashint = new BigInteger(hex.toString(),16);	
+			
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
-		// convert the hex into BigInteger
-		hashint = hex;
+		
 		// return the BigInteger
 		
 		return hashint;
