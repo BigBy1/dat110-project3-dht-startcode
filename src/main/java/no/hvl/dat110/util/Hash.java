@@ -28,10 +28,8 @@ public class Hash {
 			byte[] siffere = md.digest(entity.getBytes(StandardCharsets.UTF_8));
 			
 			// convert the hash into hex format
-			StringBuilder hex = new StringBuilder();
-			for (int i = 0; i<siffere.length;i++) {
-				hex.append(String.format("%02x", siffere[i]));
-			}
+			
+			String hex = toHex(siffere);
 			
 		// convert the hex into BigInteger
 		hashint = new BigInteger(hex.toString(),16);	
@@ -63,7 +61,7 @@ public class Hash {
 	
 	public static int bitSize() {
 		
-		int digestlen = 0;
+		int digestlen = 16;
 		
 		// find the digest length
 		
