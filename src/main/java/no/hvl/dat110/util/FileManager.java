@@ -125,7 +125,7 @@ public class FileManager {
 		// iterate over the replicas of the file
 		for(int i = 0; i<replicafiles.length;i++) {
 			// for each replica, do findSuccessor(replica) that returns successor s.
-			BigInteger b = replicafiles[i];
+			BigInteger b = replicafiles[i]; 
 			NodeInterface node = chordnode.findSuccessor(b);
 			// get the metadata (Message) of the replica from the successor (i.e., active peer) of the file
 			Message message = node.getFilesMetadata(b);
