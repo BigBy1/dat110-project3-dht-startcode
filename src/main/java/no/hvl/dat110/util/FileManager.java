@@ -21,6 +21,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import no.hvl.dat110.chordoperations.ChordLookup;
 import no.hvl.dat110.middleware.Message;
 import no.hvl.dat110.rpc.interfaces.NodeInterface;
 
@@ -113,21 +114,26 @@ public class FileManager {
 	 * @throws RemoteException 
 	 */
 	public Set<Message> requestActiveNodesForFile(String filename) throws RemoteException {
-
-		this.filename = filename;
-		activeNodesforFile = new HashSet<Message>(); 
-
-		// Task: Given a filename, find all the peers that hold a copy of this file
 		
+		// Task: Given a filename, find all the peers that hold a copy of this file
+		this.filename = filename;
+		activeNodesforFile = new HashSet<Message>();
 		// generate the N replicas from the filename by calling createReplicaFiles()
+		createReplicaFiles();
+		
 		
 		// iterate over the replicas of the file
+		for(int i = 0; i<replicafiles.length;i++) {
+			// for each replica, do findSuccessor(replica) that returns successor s.
+			BigInteger b = replicafiles[i];
+			NodeInterface node = chordnode.findSuccessor(b);
+			// get the metadata (Message) of the replica from the successor (i.e., active peer) of the file
+			Message message = node.getFilesMetadata(b);
+			// save the metadata in the set activeNodesforFile.
+			activeNodesforFile.add(message);
+		}
 		
-		// for each replica, do findSuccessor(replica) that returns successor s.
 		
-		// get the metadata (Message) of the replica from the successor (i.e., active peer) of the file
-		
-		// save the metadata in the set activeNodesforFile.
 		
 		return activeNodesforFile;
 	}
