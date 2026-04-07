@@ -92,9 +92,12 @@ public class FileManager {
     	// Task2: assign a replica as the primary for this file. Hint, see the slide (project 3) on Canvas
     	
     	// create replicas of the filename
-    	
+    	createReplicaFiles();
+    	activeNodesforFile = requestActiveNodesForFile(filename);
 		// iterate over the replicas
-    	
+    	for(int i = 0; i<numReplicas; i++) {
+    		
+    	}
     	// for each replica, find its successor (peer/node) by performing findSuccessor(replica)
     	
     	// call the addKey on the successor and add the replica
