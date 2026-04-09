@@ -45,21 +45,15 @@ public class Util {
 		
 		// Task: given an identifier, id: check whether pred < id <= node
 
-		boolean result = false;
-
-		if (lower.compareTo(upper) < 0) {
+		if (lower.compareTo(upper) <= 0) {
 			//case: lower < upper
-			if (id.compareTo(lower) > 0 && id.compareTo(upper) <= 0) {
-				result = true;
-			}
-		} else if (lower.compareTo(upper) >= 0) {
+			return (id.compareTo(lower) >= 0 && id.compareTo(upper) <= 0);
+		} else if (lower.compareTo(upper) > 0) {
 			//case: lower >= upper
-			if (id.compareTo(lower) > 0 || id.compareTo(upper) <= 0) {
-				result = true;
-			}
+			return (id.compareTo(lower) >= 0 || id.compareTo(upper) <= 0);
+		} else {
+			return false;
 		}
-		
-		return result;
 	}
 	
 	public static List<String> toString(List<NodeInterface> list) throws RemoteException {
