@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import no.hvl.dat110.rpc.interfaces.NodeInterface;
+import no.hvl.dat110.util.FileManager;
 import no.hvl.dat110.util.LamportClock;
 import no.hvl.dat110.util.Util;
 
@@ -68,18 +69,26 @@ public class MutualExclusion {
 		// start MutualExclusion algorithm
 		
 			// first, call removeDuplicatePeersBeforeVoting. A peer can hold/contain 2 replicas of a file. This peer will appear twice
-		removeDuplicatePeersBeforeVoting();
 			// multicast the message to activenodes (hint: use multicastMessage)
-		
+		List<Message> activenodes = removeDuplicatePeersBeforeVoting();
+		multicastMessage(message, activenodes);
+			
 			// check that all replicas have replied (permission) - areAllMessagesReturned(int numvoters)?
-		
+		if(areAllMessagesReturned(activenodes.size())) {
 			// if yes, acquireLock
+			acquireLock();
+			// send the updates to all replicas by calling node.broadcastUpdatetoPeers
+			node.broadcastUpdatetoPeers(updates);
+			// clear the mutexqueue
+				mutexqueue.clear();
+			// return permission
+				return true;
+		}
+			
 		
-				// send the updates to all replicas by calling node.broadcastUpdatetoPeers
+				
+				
 		
-				// clear the mutexqueue
-		
-		// return permission
 		
 		return false;
 	}
@@ -90,7 +99,9 @@ public class MutualExclusion {
 		logger.info("Number of peers to vote = "+activenodes.size());
 		
 		// iterate over the activenodes
-		
+		for(Message p : node.activenodesforfile) {
+			NodeInterface stub = Util.getProcessStub(null, p.getPort())
+		}
 		// obtain a stub for each node from the registry
 		
 		// call onMutexRequestReceived()
