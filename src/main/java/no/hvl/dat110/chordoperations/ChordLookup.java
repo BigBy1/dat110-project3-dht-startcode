@@ -35,16 +35,27 @@ public class ChordLookup {
 		// ask this node to find the successor of key
 		
 		// get the successor of the node
+		NodeInterface successor = node.getSuccessor();
 		
 		// check that key is a member of the set {nodeid+1,...,succID} i.e. (nodeid+1 <= key <= succID) using the checkInterval
-		
+		BigInteger nodeID = node.getNodeID();
+
+		boolean isInInterval = Util.checkInterval(key, nodeID, successor.getNodeID());
+
 		// if logic returns true, then return the successor
-		
+		if (isInInterval) {
+			return successor;
+		}
+
 		// if logic returns false; call findHighestPredecessor(key)
+		NodeInterface highestPredecessor = findHighestPredecessor(key);
 		
 		// do highest_pred.findSuccessor(key) - This is a recursive call until logic returns true
-				
-		return null;					
+		if (highestPredecessor != null && !highestPredecessor.getNodeName().equals(node.getNodeName())) {
+			return highestPredecessor.findSuccessor(key);
+		}
+
+		return node;
 	}
 	
 	/**
@@ -56,15 +67,30 @@ public class ChordLookup {
 	private NodeInterface findHighestPredecessor(BigInteger ID) throws RemoteException {
 		
 		// collect the entries in the finger table for this node
-		
+		List<NodeInterface> fingerTable = node.getFingerTable();
+
 		// starting from the last entry, iterate over the finger table
+		BigInteger nodeID = node.getNodeID();
 		
 		// for each finger, obtain a stub from the registry
-		
-		// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
-		
-		// if logic returns true, then return the finger (means finger is the closest to key)
-		
+		for (int i = fingerTable.size() - 1; i >= 0; i--) {
+			NodeInterface fingerNode = fingerTable.get(i);
+
+			if (fingerNode == null) {
+				continue;
+			}
+
+			BigInteger fingerID = fingerNode.getNodeID();
+
+			// check that finger is a member of the set {nodeID+1,...,ID-1} i.e. (nodeID+1 <= finger <= key-1) using the ComputeLogic
+			boolean isInInterval = Util.checkInterval(fingerID, nodeID, ID);
+
+			// if logic returns true, then return the finger (means finger is the closest to key)
+			if (isInInterval) {
+				return fingerNode;
+			}
+		}
+
 		return (NodeInterface) node;			
 	}
 	
