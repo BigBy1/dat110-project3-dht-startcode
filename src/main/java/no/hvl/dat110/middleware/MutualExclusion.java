@@ -182,11 +182,18 @@ public class MutualExclusion {
 					stub.onMutexAcknowledgementReceived(message);
 				}
 				// if clocks are the same, compare nodeIDs, the lowest wins
-				
+				if(clockS==clockR) {
+
+					if(message.getNodeID()>node.getNodeID()) {
+						// if sender looses, queue it
+						mutexqueue.add(message);
+					}
+				}
 				
 				if(clockS>clockR) {
 					// if sender looses, queue it
-					stub.onMutexAcknowledgementReceived(message);
+					mutexqueue.add(message);
+					
 					
 				}
 				break;
