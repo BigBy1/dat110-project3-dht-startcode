@@ -107,7 +107,7 @@ public class MutualExclusion {
 		}
 		
 	}
-	
+
 	public void onMutexRequestReceived(Message message) throws RemoteException {
 		
 		// increment the local clock
@@ -151,18 +151,18 @@ public class MutualExclusion {
 			case 0: {
 				
 				// get a stub for the sender from the registry
-				
+				NodeInterface stub = Util.getProcessStub(procName, port);
 				// acknowledge message
-				
+				message.setAcknowledged(true);		
 				// send acknowledgement back by calling onMutexAcknowledgementReceived()
-				
+				stub.onMutexAcknowledgementReceived(message);
 				break;
 			}
 		
 			/** case 1: Receiver already has access to the resource (dont reply but queue the request) */
 			case 1: {
-				
 				// queue this message
+				mutexqueue.add(message);
 				break;
 			}
 			
@@ -171,19 +171,24 @@ public class MutualExclusion {
 			 *  the message with lower timestamp wins) - send OK if received is lower. Queue message if received is higher
 			 */
 			case 2: {
-				
+				NodeInterface stub = Util.getProcessStub(procName, port);
 				// check the clock of the sending process (note that the correct clock is in the received message)
-				
+				int clockS = message.getClock();
 				// own clock of the receiver (note that the correct clock is in the node's message)
-				
+				int clockR = clock.getClock();
 				// compare clocks, the lowest wins
-				
+				if(clockS<clockR) {
+					// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
+					stub.onMutexAcknowledgementReceived(message);
+				}
 				// if clocks are the same, compare nodeIDs, the lowest wins
 				
-				// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
 				
-				// if sender looses, queue it
-
+				if(clockS>clockR) {
+					// if sender looses, queue it
+					stub.onMutexAcknowledgementReceived(message);
+					
+				}
 				break;
 			}
 			
