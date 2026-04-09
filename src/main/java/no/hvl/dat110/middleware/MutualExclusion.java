@@ -99,30 +99,42 @@ public class MutualExclusion {
 		logger.info("Number of peers to vote = "+activenodes.size());
 		
 		// iterate over the activenodes
-		for(Message p : node.activenodesforfile) {
-			NodeInterface stub = Util.getProcessStub(null, p.getPort())
+		for(Message p : activenodes) {
+			// obtain a stub for each node from the registry
+			NodeInterface stub = Util.getProcessStub(p.getNodeName(), p.getPort());
+			// call onMutexRequestReceived()
+			stub.onMutexRequestReceived(message);
 		}
-		// obtain a stub for each node from the registry
-		
-		// call onMutexRequestReceived()
 		
 	}
 	
 	public void onMutexRequestReceived(Message message) throws RemoteException {
 		
 		// increment the local clock
-		
+		clock.increment();
 		// if message is from self, acknowledge, and call onMutexAcknowledgementReceived()
-			
+		if(node.getNodeID().equals(message.getNodeID())) {
+			onMutexAcknowledgementReceived(message);
+		}
 		int caseid = -1;
 		
 		/* write if statement to transition to the correct caseid in the doDecisionAlgorithm */
-		
+		if(!node.getNodeID().equals(message.getNodeID())) {
 			// caseid=0: Receiver is not accessing shared resource and does not want to (send OK to sender)
-		
+			if(!CS_BUSY&&!WANTS_TO_ENTER_CS) {
+				caseid=0;
+			}
 			// caseid=1: Receiver already has access to the resource (dont reply but queue the request)
-		
+			if(CS_BUSY) {
+				caseid=1;
+			}
 			// caseid=2: Receiver wants to access resource but is yet to - compare own message clock to received message's clock
+			if(!CS_BUSY && WANTS_TO_ENTER_CS) {
+				caseid=2;
+			}
+		}
+			
+			
 		
 		// check for decision
 		doDecisionAlgorithm(message, mutexqueue, caseid);
@@ -135,7 +147,7 @@ public class MutualExclusion {
 		
 		switch(condition) {
 		
-			/** case 1: Receiver is not accessing shared resource and does not want to (send OK to sender) */
+			/** case 0: Receiver is not accessing shared resource and does not want to (send OK to sender) */
 			case 0: {
 				
 				// get a stub for the sender from the registry
@@ -147,7 +159,7 @@ public class MutualExclusion {
 				break;
 			}
 		
-			/** case 2: Receiver already has access to the resource (dont reply but queue the request) */
+			/** case 1: Receiver already has access to the resource (dont reply but queue the request) */
 			case 1: {
 				
 				// queue this message
@@ -155,7 +167,7 @@ public class MutualExclusion {
 			}
 			
 			/**
-			 *  case 3: Receiver wants to access resource but is yet to (compare own message clock to received message's clock
+			 *  case 2: Receiver wants to access resource but is yet to (compare own message clock to received message's clock
 			 *  the message with lower timestamp wins) - send OK if received is lower. Queue message if received is higher
 			 */
 			case 2: {
