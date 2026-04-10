@@ -28,7 +28,9 @@ public class MutualExclusion {
 	private boolean CS_BUSY = false;						// indicate to be in critical section (accessing a shared resource) 
 	private boolean WANTS_TO_ENTER_CS = false;				// indicate to want to enter CS
 	private List<Message> queueack; 						// queue for acknowledged messages
-	private List<Message> mutexqueue;						// queue for storing process that are denied permission. We really don't need this for quorum-protocol
+	private List<Message> mutexqueue;					// queue for storing process that are denied permission. We really don't need this for quorum-protocol
+	
+	private int clockMessage = -1;
 	
 	private LamportClock clock;								// lamport clock
 	private Node node;
@@ -62,7 +64,8 @@ public class MutualExclusion {
 		// increment clock
 		clock.increment();
 		// adjust the clock on the message, by calling the setClock on the message
-		message.setClock(clock.getClock());		
+		message.setClock(clock.getClock());
+		clockMessage = message.getClock();
 		// wants to access resource - set the appropriate lock variable
 		WANTS_TO_ENTER_CS = true;
 		
@@ -77,6 +80,7 @@ public class MutualExclusion {
 		if(areAllMessagesReturned(activenodes.size())) {
 			// if yes, acquireLock
 			acquireLock();
+			clockMessage = -1;
 			// send the updates to all replicas by calling node.broadcastUpdatetoPeers
 			node.broadcastUpdatetoPeers(updates);
 			// clear the mutexqueue
@@ -175,7 +179,7 @@ public class MutualExclusion {
 				// check the clock of the sending process (note that the correct clock is in the received message)
 				int clockS = message.getClock();
 				// own clock of the receiver (note that the correct clock is in the node's message)
-				int clockR = clock.getClock();
+				int clockR = clockMessage;
 				// compare clocks, the lowest wins
 				if(clockS<clockR) {
 					// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
@@ -221,20 +225,35 @@ public class MutualExclusion {
 		logger.info("Releasing locks from = "+activenodes.size());
 		
 		// iterate over the activenodes
+		for(Message p : activenodes) {
+			String procName = p.getNodeName();
+			int port = p.getPort();
+			// obtain a stub for each node from the registry
+			NodeInterface stub = Util.getProcessStub(procName, port);
+			// call releaseLocks()	
+			try {
+				stub.releaseLocks();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
-		// obtain a stub for each node from the registry
 		
-		// call releaseLocks()	
+		
 	}
 	
 	private boolean areAllMessagesReturned(int numvoters) throws RemoteException {
 		logger.info(node.getNodeName()+": size of queueack = "+queueack.size());
 		
 		// check if the size of the queueack is the same as the numvoters
-		
-		// clear the queueack
-		
+		if(queueack.size()==numvoters) {
+			// clear the queueack
+			queueack.clear();
 		// return true if yes and false if no
+			return true;
+		}
+		
 		
 		return false;
 	}
