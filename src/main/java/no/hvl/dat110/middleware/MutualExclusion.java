@@ -179,14 +179,20 @@ public class MutualExclusion {
 				// compare clocks, the lowest wins
 				if(clockS<clockR) {
 					// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
+					message.setAcknowledged(true);
 					stub.onMutexAcknowledgementReceived(message);
 				}
 				// if clocks are the same, compare nodeIDs, the lowest wins
 				if(clockS==clockR) {
 
-					if(message.getNodeID()>node.getNodeID()) {
+					if(message.getNodeID().compareTo(node.getNodeID())>0) {
 						// if sender looses, queue it
 						mutexqueue.add(message);
+					}
+					if(message.getNodeID().compareTo(node.getNodeID())<0) {
+						// if sender wins, acknowledge the message, obtain a stub and call onMutexAcknowledgementReceived()
+						
+						stub.onMutexAcknowledgementReceived(message);
 					}
 				}
 				
@@ -206,7 +212,7 @@ public class MutualExclusion {
 	
 	public void onMutexAcknowledgementReceived(Message message) throws RemoteException {
 		
-		// add message to queueack
+		queueack.add(message);
 		
 	}
 	
