@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import no.hvl.dat110.middleware.Node;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,7 +84,7 @@ public class FileManager {
     	
     	// randomly appoint the primary server to this file replicas
     	Random rnd = new Random(); 							
-    	int index = rnd.nextInt(Util.numReplicas-1);
+    	int index = rnd.nextInt(Util.numReplicas);
     	
     	int counter = 0;
 	
@@ -93,20 +94,26 @@ public class FileManager {
     	
     	// create replicas of the filename
     	createReplicaFiles();
+
 		// iterate over the replicas
     	for(int i = 0; i<numReplicas; i++) {
-    		// for each replica, find its successor (peer/node) by performing findSuccessor(replica)
-    		
-    	}
-    	
-    	
-    	// call the addKey on the successor and add the replica
-		
-		// implement a logic to decide if this successor should be assigned as the primary for the file
-    	
-    	// call the saveFileContent() on the successor and set isPrimary=true if logic above is true otherwise set isPrimary=false
-    	
-    	// increment counter
+			// for each replica, find its successor (peer/node) by performing findSuccessor(replica)
+			BigInteger replica = replicafiles[i];
+			NodeInterface successor = chordnode.findSuccessor(replica);
+
+			// call the addKey on the successor and add the replica
+			successor.addKey(replica);
+
+			// implement a logic to decide if this successor should be assigned as the primary for the file
+			boolean	isPrimary = (i == index);
+
+			// call the saveFileContent() on the successor and set isPrimary=true if logic above is true otherwise set isPrimary=false
+			successor.saveFileContent(filename, replica, bytesOfFile, isPrimary);
+
+			// increment counter
+			counter++;
+		}
+
 		return counter;
     }
 	

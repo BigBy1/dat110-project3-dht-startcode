@@ -173,12 +173,19 @@ public class Node extends UnicastRemoteObject implements NodeInterface {
 	}
 	
 	/** Remote-write */
+	/**
 	@Override
 	public void requestRemoteWriteOperation(byte[] updates, Set<Message> activenodes) throws RemoteException {
 		this.activenodesforfile = activenodes;
 		broadcastUpdatetoPeers(updates);		
 	}
-	
+	*/
+
+	@Override
+	public void requestRemoteWriteOperation(byte[] updates, Set<Message> activenodes) throws RemoteException {
+		this.activenodesforfile = activenodes;
+		broadcastUpdatetoPeers(updates);
+	}
 	
 	/** Mutex Section */
 
